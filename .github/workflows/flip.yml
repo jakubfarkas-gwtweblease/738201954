@@ -1,0 +1,35 @@
+name: FLIP da Bazos
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # kazdych 10 min (GitHub schedule byva oneskoreny - viz README)
+  workflow_dispatch: {}        # da sa spustit rucne aj cez cron-job.org (API trigger)
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # aby Action mohla commitnut seen_ads.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run FLIP da Bazos
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          EXTRA_CHAT_IDS: ${{ secrets.EXTRA_CHAT_IDS }}
+        run: python flip_bazos.py
+
+      - name: Persist seen_ads.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add seen_ads.json
+          git diff --staged --quiet || git commit -m "update seen_ads"
+          git push
