@@ -1,8 +1,6 @@
 name: FLIP da Bazos
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"   # kazdych 10 min (GitHub schedule byva oneskoreny - viz README)
   workflow_dispatch: {}        # da sa spustit rucne aj cez cron-job.org (API trigger)
 
 jobs:
